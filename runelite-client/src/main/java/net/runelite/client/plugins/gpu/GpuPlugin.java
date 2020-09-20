@@ -29,7 +29,7 @@ import com.google.inject.Provides;
 import com.jogamp.nativewindow.awt.AWTGraphicsConfiguration;
 import com.jogamp.nativewindow.awt.JAWTWindow;
 import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL4;
+import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLDrawable;
@@ -137,7 +137,7 @@ public class GpuPlugin extends Plugin implements DrawCallbacks
 
 	private Canvas canvas;
 	private JAWTWindow jawtWindow;
-	private GL4 gl;
+	private GL3 gl;
 	private GLContext glContext;
 	private GLDrawable glDrawable;
 
@@ -149,22 +149,22 @@ public class GpuPlugin extends Plugin implements DrawCallbacks
 	static final String WINDOWS_VERSION_HEADER = "#version 430\n";
 
 	static final Shader PROGRAM = new Shader()
-		.add(GL4.GL_VERTEX_SHADER, "vert.glsl")
-		.add(GL4.GL_GEOMETRY_SHADER, "geom.glsl")
-		.add(GL4.GL_FRAGMENT_SHADER, "frag.glsl");
+		.add(GL3.GL_VERTEX_SHADER, "vert.glsl")
+		.add(GL3.GL_GEOMETRY_SHADER, "geom.glsl")
+		.add(GL3.GL_FRAGMENT_SHADER, "frag.glsl");
 
 	static final Shader COMPUTE_PROGRAM = new Shader()
-		.add(GL4.GL_COMPUTE_SHADER, "comp.glsl");
+		.add(GL3.GL_COMPUTE_SHADER, "comp.glsl");
 
 	static final Shader SMALL_COMPUTE_PROGRAM = new Shader()
-		.add(GL4.GL_COMPUTE_SHADER, "comp_small.glsl");
+		.add(GL3.GL_COMPUTE_SHADER, "comp_small.glsl");
 
 	static final Shader UNORDERED_COMPUTE_PROGRAM = new Shader()
-		.add(GL4.GL_COMPUTE_SHADER, "comp_unordered.glsl");
+		.add(GL3.GL_COMPUTE_SHADER, "comp_unordered.glsl");
 
 	static final Shader UI_PROGRAM = new Shader()
-		.add(GL4.GL_VERTEX_SHADER, "vertui.glsl")
-		.add(GL4.GL_FRAGMENT_SHADER, "fragui.glsl");
+		.add(GL3.GL_VERTEX_SHADER, "vertui.glsl")
+		.add(GL3.GL_FRAGMENT_SHADER, "fragui.glsl");
 
 	private int glProgram;
 	private int glComputeProgram;
@@ -312,7 +312,7 @@ public class GpuPlugin extends Plugin implements DrawCallbacks
 
 				invokeOnMainThread(() ->
 				{
-					GLProfile glProfile = GLProfile.get(GLProfile.GL4);
+					GLProfile glProfile = GLProfile.get(GLProfile.GL3);
 
 					GLCapabilities glCaps = new GLCapabilities(glProfile);
 					AWTGraphicsConfiguration config = AWTGraphicsConfiguration.create(canvas.getGraphicsConfiguration(), glCaps, glCaps);
@@ -352,7 +352,7 @@ public class GpuPlugin extends Plugin implements DrawCallbacks
 						jawtWindow.unlockSurface();
 					}
 
-					this.gl = glContext.getGL().getGL4();
+					this.gl = glContext.getGL().getGL3();
 					gl.setSwapInterval(0);
 
 					if (log.isDebugEnabled())
