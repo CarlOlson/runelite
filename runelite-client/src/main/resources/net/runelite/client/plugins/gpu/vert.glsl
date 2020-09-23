@@ -25,6 +25,9 @@
 
 #version 330
 
+#define PI 3.1415926535897932384626433832795f
+#define UNIT PI / 1024.0f
+
 #define TILE_SIZE 128
 
 #define FOG_SCENE_EDGE_MIN TILE_SIZE
@@ -52,45 +55,30 @@ uniform int useFog;
 uniform int fogDepth;
 uniform int drawDistance;
 
-out ivec3 vPosition;
-out vec4 vColor;
-out float vHsl;
-out vec4 vUv;
-out float vFogAmount;
+uniform mat4 projectionMatrix;
+
+out vec4 Color;
+centroid out float fHsl;
+out vec4 fUv;
+out float fogAmount;
 
 #include hsl_to_rgb.glsl
-
-float fogFactorLinear(const float dist, const float start, const float end) {
-  return 1.0 - clamp((dist - start) / (end - start), 0.0, 1.0);
-}
+#include to_screen.glsl
 
 void main()
 {
-  ivec3 vertex = VertexPosition.xyz;
+  ivec3 cameraPos = ivec3(cameraX, cameraY, cameraZ);
+  vec3 screenPos = toScreen(VertexPosition.xyz - cameraPos, cameraYaw, cameraPitch, centerX, centerY, zoom);
+  vec4 tmp = vec4(screenPos.xyz, 1.0);
   int ahsl = VertexPosition.w;
   int hsl = ahsl & 0xffff;
   float a = float(ahsl >> 24 & 0xff) / 255.f;
 
   vec3 rgb = hslToRgb(hsl);
 
-  vPosition = vertex;
-  vColor = vec4(rgb, 1.f - a);
-  vHsl = float(hsl);
-  vUv = uv;
-
-  int fogWest = max(FOG_SCENE_EDGE_MIN, cameraX - drawDistance);
-  int fogEast = min(FOG_SCENE_EDGE_MAX, cameraX + drawDistance - TILE_SIZE);
-  int fogSouth = max(FOG_SCENE_EDGE_MIN, cameraZ - drawDistance);
-  int fogNorth = min(FOG_SCENE_EDGE_MAX, cameraZ + drawDistance - TILE_SIZE);
-
-  // Calculate distance from the scene edge
-  int xDist = min(vertex.x - fogWest, fogEast - vertex.x);
-  int zDist = min(vertex.z - fogSouth, fogNorth - vertex.z);
-  float nearestEdgeDistance = min(xDist, zDist);
-  float secondNearestEdgeDistance = max(xDist, zDist);
-  float fogDistance = nearestEdgeDistance - FOG_CORNER_ROUNDING * TILE_SIZE *
-      max(0, (nearestEdgeDistance + FOG_CORNER_ROUNDING_SQUARED) /
-             (secondNearestEdgeDistance + FOG_CORNER_ROUNDING_SQUARED));
-
-  vFogAmount = fogFactorLinear(fogDistance, 0, fogDepth * TILE_SIZE) * useFog;
+  gl_Position  = (-screenPos.z < 50) ? vec4(0f, 0f, 0f, 0f) : projectionMatrix * tmp;
+  Color = vec4(rgb, 1.f - a);
+  fHsl = float(hsl);
+  fUv = uv;
+  fogAmount = 0.0;
 }

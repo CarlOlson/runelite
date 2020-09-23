@@ -59,6 +59,5 @@ void main() {
     smoothColor = textureColorBrightness * smoothColor;
   }
 
-  vec3 mixedColor = mix(smoothColor.rgb, fogColor.rgb, fogAmount);
-  FragColor = vec4(mixedColor, smoothColor.a);
+  FragColor = smoothColor;
 }
